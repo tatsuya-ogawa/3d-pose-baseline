@@ -75,12 +75,19 @@ train_dir = os.path.join( FLAGS.train_dir,
   'batch_normalization' if FLAGS.batch_norm else 'no_batch_normalization',
   'use_stacked_hourglass' if FLAGS.use_sh else 'not_stacked_hourglass',
   'predict_14' if FLAGS.predict_14 else 'predict_17')
-
+train_dir='train'
 print( train_dir )
 summaries_dir = os.path.join( train_dir, "log" ) # Directory for TB summaries
 
 # To avoid race conditions: https://github.com/tensorflow/tensorflow/issues/7448
-os.system('mkdir -p {}'.format(summaries_dir))
+def mkdir_p(path):
+  try:
+    if not os.path.isdir(path):
+      os.makedirs(path)
+  except OSError as exc:  # Python >2.5
+    raise exec
+#os.system('mkdir -p {}'.format(summaries_dir))
+mkdir_p(summaries_dir)
 
 def create_model( session, actions, batch_size ):
   """
