@@ -74,8 +74,12 @@ class LinearModel(object):
     self.input_size  = self.HUMAN_2D_SIZE
     self.output_size = self.HUMAN_3D_SIZE
 
-    self.isTraining = tf.placeholder(tf.bool,name="isTrainingflag")
-    self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
+    if batch_norm:
+      self.isTraining = tf.placeholder(tf.bool,name="isTrainingflag")
+      self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
+    else:
+      self.isTraining = False
+      self.dropout_keep_prob = 1.0
 
     # Summary writers for train and test runs
     self.train_writer = tf.summary.FileWriter( os.path.join(summaries_dir, 'train' ))
@@ -83,7 +87,10 @@ class LinearModel(object):
 
     self.linear_size   = linear_size
     self.batch_size    = batch_size
-    self.learning_rate = tf.Variable( float(learning_rate), trainable=False, dtype=dtype, name="learning_rate")
+    if batch_norm:
+      self.learning_rate = tf.Variable( float(learning_rate), trainable=False, dtype=dtype, name="learning_rate")
+    else:
+      self.learning_rate = 0.
     self.global_step   = tf.Variable(0, trainable=False, name="global_step")
     decay_steps = 100000  # empirical
     decay_rate = 0.96     # empirical
@@ -134,6 +141,7 @@ class LinearModel(object):
     self.err_mm_summary = tf.summary.scalar( "loss/error_mm", self.err_mm )
 
     # Gradients and update operation for training the model.
+    
     opt = tf.train.AdamOptimizer( self.learning_rate )
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
